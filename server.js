@@ -1,26 +1,21 @@
 const express = require('express');
 const path = require('path');
-const { fetchPage } = require('./proxy.js'); // proxy.jsをインポート
+// v2のproxy.jsは関数をエクスポートしているので、それに合わせる
+const { fetchPage } = require('./proxy.js'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 'public'フォルダの絶対パスを定義
-const publicDirectoryPath = path.join(__dirname, 'public');
-
-// サーバー起動時に、publicフォルダの場所をログに出力（確認のため）
-console.log(`[INFO] Serving static files from: ${publicDirectoryPath}`);
-
-// 1. 静的ファイルを提供するミドルウェアを最初に設定
-//    'public'フォルダの中にあるファイル（index.html, style.cssなど）を
-//    ブラウザから直接アクセスできるようにします。
-app.use(express.static(publicDirectoryPath));
-
-// 2. POSTリクエストのJSONボディを解析するミドルウェア
-//    これは必ずAPIルートの前に置きます。
+// 1. POSTリクエストのJSONボディを解析するミドルウェアを最初に設定
 app.use(express.json());
 
-// 3. プロキシ処理を行うAPIルート
+// 2. 静的ファイルを提供するミドルウェアを設定
+//    ブラウザからの /style.css や /script.js のリクエストは、
+//    ここで public フォルダの中身が自動的に返されます。
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 3. プロキシAPIのエンドポイントを設定
+//    /proxy へのPOSTリクエストのみ、ここで処理されます。
 app.post('/proxy', async (req, res) => {
     const { url } = req.body;
     if (!url) {
@@ -34,7 +29,16 @@ app.post('/proxy', async (req, res) => {
     }
 });
 
-// 4. サーバーを起動
+
+// 4. 【重要】ルートURL ('/') へのGETリクエストが来た時だけ、index.htmlを返す
+//    v2ではindex.htmlはpublicフォルダにあるので、パスを修正します。
+//    app.get('*', ...) を使わないことで、CSSのリクエストを邪魔しません。
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
+// サーバーを起動
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
