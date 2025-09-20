@@ -1,15 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM要素の取得（HTMLのIDと完全に一致させる）
+    // --- グローバル変数 ---
+    let proxiedActive = false; // プロキシでページが表示されているかを管理するフラグ
+    let hideTimer = null; // バーを非表示にするためのタイマー
+
+    // --- DOM要素の取得 ---
     const topLarge = document.getElementById('top-large');
     const topSmall = document.getElementById('top-small');
     const content = document.getElementById('content');
     const resultFrame = document.getElementById('result-frame');
-
     const inputLarge = document.getElementById('url-input-large');
     const buttonLarge = document.getElementById('fetch-button-large');
-
     const inputSmall = document.getElementById('url-input-small');
     const buttonSmall = document.getElementById('fetch-button-small');
+
+    // --- 関数定義 ---
+
+    /**
+     * 上部バーの表示/非表示を制御する関数
+     * @param {boolean} visible - 表示する場合はtrue, 非表示はfalse
+     */
+    const setTopSmallVisible = (visible) => {
+        if (!topSmall) return;
+        if (visible) {
+            topSmall.style.top = '0';
+        } else {
+            // CSSで定義された高さ(-60px)まで押し上げる
+            topSmall.style.top = '-60px'; 
+        }
+    };
 
     /**
      * URLをプロキシ経由でiframeに読み込むメイン関数
@@ -21,68 +39,76 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 検索語だった場合、Google検索のURLに変換する
         let targetUrl = url;
-        if (!url.includes('.') || url.includes(' ')) {
-             if(!url.startsWith('http://') && !url.startsWith('https://')){
-                targetUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
-             }
-        }
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            targetUrl = 'https://' + url;
+            if (url.includes('.') && !url.includes(' ')) {
+                targetUrl = 'https://' + url;
+            } else {
+                targetUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+            }
         }
-
-        // iframeのsrcを、サーバーの/proxyエンドポイントに設定する
-        // これでコンテンツの読み込みが開始される
+        
         resultFrame.src = `/proxy?url=${encodeURIComponent(targetUrl)}`;
 
-        // 初回実行時にUIを切り替える
         if (topLarge && content && !content.classList.contains('visible')) {
+            proxiedActive = true; // ★プロキシが有効になったことを記録
             topLarge.style.opacity = '0';
             topLarge.style.transform = 'scale(0.9)';
             setTimeout(() => {
                 topLarge.style.display = 'none';
                 content.classList.add('visible');
-                if (topSmall) {
-                    topSmall.style.top = '0';
-                }
-            }, 300); // CSSのtransition時間と合わせる
+            }, 300);
         }
+    };
+
+    /**
+     * 上部バーの自動表示/非表示イベントを初期化する関数
+     */
+    const initTopBarAutoHide = () => {
+        document.addEventListener('mousemove', (e) => {
+            // このフラグがtrueの時だけ自動表示/非表示を有効にする
+            if (!proxiedActive) return;
+
+            // 画面の上端40px以内に入ったら
+            if (e.clientY <= 40) {
+                clearTimeout(hideTimer); // 非表示タイマーをキャンセル
+                setTopSmallVisible(true); // バーを表示
+            } else {
+                clearTimeout(hideTimer); // 既存のタイマーをリセット
+                // 700ミリ秒後にバーを隠すタイマーをセット
+                hideTimer = setTimeout(() => setTopSmallVisible(false), 700);
+            }
+        });
+
+        // マウスがウィンドウから離れた時の処理
+        document.addEventListener('mouseleave', () => {
+            if (!proxiedActive) return;
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => setTopSmallVisible(false), 300);
+        });
     };
 
     // --- イベントリスナーの設定 ---
 
-    // 大きな入力フォーム
     if (buttonLarge && inputLarge) {
-        buttonLarge.addEventListener('click', () => {
-            loadInProxy(inputLarge.value);
-        });
+        buttonLarge.addEventListener('click', () => loadInProxy(inputLarge.value));
         inputLarge.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                loadInProxy(inputLarge.value);
-            }
+            if (e.key === 'Enter') loadInProxy(inputLarge.value);
         });
     }
 
-    // 小さな入力フォーム
     if (buttonSmall && inputSmall) {
-        buttonSmall.addEventListener('click', () => {
-            loadInProxy(inputSmall.value);
-        });
+        buttonSmall.addEventListener('click', () => loadInProxy(inputSmall.value));
         inputSmall.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                loadInProxy(inputSmall.value);
-            }
+            if (e.key === 'Enter') loadInProxy(inputSmall.value);
         });
     }
 
-    // 2つの入力欄の値を同期させる
     if(inputLarge && inputSmall){
-        inputLarge.addEventListener('input', () => {
-            inputSmall.value = inputLarge.value;
-        });
-        inputSmall.addEventListener('input', () => {
-            inputLarge.value = inputSmall.value;
-        });
+        inputLarge.addEventListener('input', () => { inputSmall.value = inputLarge.value; });
+        inputSmall.addEventListener('input', () => { inputLarge.value = inputLarge.value; });
     }
+
+    // --- 初期化処理 ---
+    initTopBarAutoHide(); // 自動表示/非表示機能を有効化
 });
