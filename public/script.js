@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!proxiedActive) return;
 
             // 画面の上端40px以内に入ったら
-            if (e.clientY <= 40) {
+            if (e.clientY <= 67) {
                 clearTimeout(hideTimer); // 非表示タイマーをキャンセル
                 setTopSmallVisible(true); // バーを表示
             } else {
