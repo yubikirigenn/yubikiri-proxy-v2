@@ -3,23 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yubikiri Proxy</title>
-    <!-- パスが /style.css になっていることに注意 -->
+    <title>Advanced Proxy</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="container">
+
+    <!-- 初期の大きな入力フォーム -->
+    <div id="top-large">
         <h1>Yubikiri Proxy</h1>
-        <div class="input-area">
-            <input type="text" id="page-url" placeholder="表示したいページのURLを入力">
-            <button id="fetch-button">取得</button>
-        </div>
-        <div id="loading" class="hidden">読み込み中...</div>
-        <div id="result-container">
-            <iframe id="result-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+        <input type="text" id="url-input-large" placeholder="表示したいページのURLを入力">
+        <button id="fetch-button-large">Go</button>
+    </div>
+
+    <!-- スクロール時に表示される小さな入力フォーム -->
+    <div id="top-small">
+        <div class="top-small-content">
+            <input type="text" id="url-input-small" placeholder="URLを入力...">
+            <button id="fetch-button-small">Go</button>
         </div>
     </div>
-    <!-- パスが /script.js になっていることに注意 -->
+
+    <!-- プロキシ結果を表示するコンテナ -->
+    <div id="content">
+        <iframe id="result-frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+
+    <!-- バージョン表示 -->
+    <div class="version-label">
+        v1.0
+    </div>
+
     <script src="/script.js"></script>
 </body>
 </html>
