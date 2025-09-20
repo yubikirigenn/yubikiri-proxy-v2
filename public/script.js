@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 clearTimeout(hideTimer); // 既存のタイマーをリセット
                 // 700ミリ秒後にバーを隠すタイマーをセット
-                hideTimer = setTimeout(() => setTopSmallVisible(false), 700);
+                hideTimer = setTimeout(() => setTopSmallVisible(false), 300);
             }
         });
 
