@@ -1,56 +1,35 @@
 const express = require('express');
 const path = require('path');
-const { fetchPage } = require('./proxy.js');
+// 新しい関数名 'fetchAndRewrite' をインポート
+const { fetchAndRewrite } = require('./proxy.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// -------------------------------------------------------------
-// 【最終手段】静的ファイルをすべて手動でルーティングする
-// -------------------------------------------------------------
-
-// '/style.css' へのリクエストを処理
-app.get('/style.css', (req, res) => {
-    // res.type()でContent-Typeを明示的に'text/css'に設定する
-    res.type('text/css');
-    // public/style.css ファイルを送信する
-    res.sendFile(path.join(__dirname, 'public', 'style.css'));
-});
-
-// '/script.js' へのリクエストを処理
-app.get('/script.js', (req, res) => {
-    // Content-Typeを'application/javascript'に設定する
-    res.type('application/javascript');
-    // public/script.js ファイルを送信する
-    res.sendFile(path.join(__dirname, 'public', 'script.js'));
-});
-
-// express.static はもう信用しないのでコメントアウトまたは削除します
-// app.use(express.static(path.join(__dirname, 'public')));
-// -------------------------------------------------------------
+app.use(express.static(path.join(__dirname, 'public')));
 
 // プロキシAPIのエンドポイント
-app.post('/proxy', async (req, res) => {
-    const { url } = req.body;
+// v1のようにGETリクエストでURLを渡す方式に変更（こちらの方が汎用性が高い）
+app.get('/proxy', async (req, res) => {
+    const { url } = req.query; // POSTのbodyではなく、GETのクエリパラメータからURLを取得
     if (!url) {
-        return res.status(400).json({ error: 'URL is required.' });
+        return res.status(400).send('URL parameter is required.');
     }
     try {
-        const htmlContent = await fetchPage(url);
-        res.send(htmlContent);
+        const result = await fetchAndRewrite(url);
+        // ヘッダーとデータをレスポンスに設定
+        res.set(result.headers).send(result.data);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send(error.message);
     }
 });
 
-// ルートURL ('/') へのGETリクエストが来た時だけ、index.htmlを返す
+// ルートURLへのアクセス
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// サーバーを起動
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
