@@ -7,14 +7,13 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// ★★★ 変更点 ★★★
-// 静的ファイルを提供するルートを最初に定義します。
-// これにより、/style.css や /script.js へのリクエストが正しく処理されます。
+// --- ここが重要です(1) ---
+// 静的ファイル（CSS, JS）のリクエストを最初に処理するようにします。
+// これにより、'/style.css' へのアクセスが 'public/style.css' を正しく返すようになります。
 app.use(express.static(path.join(__dirname, 'public')));
 
-// '/proxy'エンドポイントへのPOSTリクエストを処理
+// APIエンドポイントの処理
 app.post('/proxy', async (req, res) => {
-    // (この部分のコードは変更なし)
     const { url } = req.body;
     if (!url) {
         return res.status(400).json({ error: 'URL is required.' });
@@ -27,14 +26,14 @@ app.post('/proxy', async (req, res) => {
     }
 });
 
-// ★★★ 変更点 ★★★
-// その他のすべてのGETリクエストに対して index.html を返します。
-// これを静的ファイル提供の後、かつAPIエンドポイントの後に置くことが重要です。
+// --- ここが重要です(2) ---
+// 上記のいずれにも一致しない、その他の全てのGETリクエストに対して 'index.html' を返します。
+// この行は必ず、静的ファイル提供の後に記述する必要があります。
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-// サーバーを指定したポートで起動
+// サーバーの起動
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
