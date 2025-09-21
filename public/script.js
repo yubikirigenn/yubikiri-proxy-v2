@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let targetUrl = url;
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (!url.startsWith('http://') && !url.startsWith('https-://')) {
             if (url.includes('.') && !url.includes(' ')) {
                 targetUrl = 'https://' + url;
             } else {
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (!proxiedActive) {
                 proxiedActive = true;
-                if (themeSwitchTop) themeSwitchTop.classList.add('hidden'); // トップページ用スイッチを隠す
+                if (themeSwitchTop) themeSwitchTop.classList.add('hidden');
                 topLarge.style.opacity = '0';
                 topLarge.style.transform = 'scale(0.9)';
                 setTimeout(() => {
@@ -74,7 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     content.classList.add('visible');
                 }, 300);
             }
-            content.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-color); font-size: 1.2em;">読み込み中...</div>`;
+            
+            // ★★★★★ この一行を変更します ★★★★★
+            // style属性に background-color を追加
+            content.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-color); background-color: var(--bg-color); font-size: 1.2em; height: 100%; box-sizing: border-box;">読み込み中...</div>`;
             
             const response = await fetch(`/proxy?url=${encodeURIComponent(targetUrl)}`);
 
@@ -89,8 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('プロキシエラー:', error);
-            content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; font-size: 1.2em;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
-            if (themeSwitchTop) themeSwitchTop.classList.remove('hidden'); // エラー時はスイッチを再表示
+            // エラーメッセージの背景もテーマに合わせる
+            content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; background-color: var(--bg-color); font-size: 1.2em; height: 100%; box-sizing: border-box;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
+            if (themeSwitchTop) themeSwitchTop.classList.remove('hidden');
             proxiedActive = false;
             setTopSmallVisible(false);
             topLarge.style.display = '';
