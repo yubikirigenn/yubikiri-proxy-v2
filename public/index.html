@@ -3,35 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yubikiri Proxy v2</title>
+    <title>Yubikiri Proxy v2.1</title>
+    <!-- CSSファイルを読み込む -->
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <!-- 初期の大きな入力フォーム -->
+
+    <!-- =================================== -->
+    <!--  テーマ切り替えスイッチ (新しく追加)  -->
+    <!-- =================================== -->
+    <div class="theme-switch" id="theme-switch" title="テーマを切り替え">
+        <div class="theme-switch-slider"></div>
+    </div>
+
+
+    <!-- =================================== -->
+    <!--   初期表示の大きな入力フォーム      -->
+    <!-- =================================== -->
     <div id="top-large">
         <h1>Yubikiri Proxy</h1>
-        <!-- ★ IDを確認: url-input-large, fetch-button-large -->
         <input type="text" id="url-input-large" placeholder="表示したいページのURLを入力">
         <button id="fetch-button-large">Go</button>
     </div>
 
-    <!-- スクロール時に表示される小さな入力フォーム -->
+
+    <!-- =================================== -->
+    <!--  検索後に表示される小さな上部バー    -->
+    <!-- =================================== -->
     <div id="top-small">
         <div class="top-small-content">
-            <!-- ★ IDを確認: url-input-small, fetch-button-small -->
             <input type="text" id="url-input-small" placeholder="URLを入力...">
             <button id="fetch-button-small">Go</button>
         </div>
     </div>
 
-    <!-- プロキシ結果を表示するコンテナ -->
-    <!-- ★ IDを確認: content -->
-    <div id="content">
-        <!-- ★ IDを確認: result-frame -->
-        <iframe id="result-frame" sandbox="allow-scripts allow-forms allow-popups allow-pointer-lock"></iframe>
+
+    <!-- =================================== -->
+    <!--   プロキシ結果を表示するコンテナ    -->
+    <!-- =================================== -->
+    <div id="content"></div>
+
+
+    <!-- =================================== -->
+    <!--          バージョン表示             -->
+    <!-- =================================== -->
+    <div class="version-label">
+        v2.1.0
     </div>
 
-    <div class="version-label">v2.0.0</div>
+
+    <!-- =================================== -->
+    <!--    JavaScriptファイルを読み込む     -->
+    <!-- =================================== -->
     <script src="/script.js"></script>
+
 </body>
 </html>
