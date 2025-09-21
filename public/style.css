@@ -58,11 +58,46 @@ body {
   /* ... 他のスタイルは変更なし ... */
 }
 
-#top-large button {
-  background: linear-gradient(to bottom, var(--button-bg-gradient-start), var(--button-bg-gradient-end));
-  color: var(--button-text-color);
-  box-shadow: 0 6px 0 var(--button-shadow-color), 0 8px 12px var(--shadow-color-medium);
-  /* ... 他のスタイルは変更なし ... */
+#top-large button:active,
+#top-small button:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+}
+#top-large button:hover {
+    transform: translateY(1px);
+}
+#top-small button:hover {
+    transform: translateY(1px);
+}
+
+
+/* 2. テーマ切り替えボタンのスタイルを修正 */
+.theme-switch {
+    /* position: fixed; を削除！ */
+    position: relative; /* 親要素内での配置のため */
+    /* top, right を削除し、配置はflexboxに任せる */
+    width: 50px;
+    height: 26px;
+    background-color: var(--input-bg-gradient-end);
+    border: 1px solid var(--input-border-color);
+    border-radius: 13px;
+    cursor: pointer;
+    z-index: 1001;
+    /* flexアイテムとしての挙動を調整 */
+    flex-shrink: 0; /* 縮まないようにする */
+}
+.theme-switch-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--button-bg-gradient-start);
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+body.light-theme .theme-switch-slider {
+    transform: translateX(24px);
 }
 
 #top-small {
