@@ -3,9 +3,6 @@ const cheerio = require('cheerio');
 
 /**
  * URLをプロキシ経由の絶対URLに変換するヘルパー関数
- * @param {string} rawUrl - 元のURL (例: "/css/style.css")
- * @param {string} baseUrl - 基準となるページのURL (例: "https://www.example.com/page")
- * @returns {string} - プロキシされたURL (例: "/proxy?url=https%3A%2F%2Fwww.example.com%2Fcss%2Fstyle.css")
  */
 function toProxiedUrl(rawUrl, baseUrl) {
     if (!rawUrl || rawUrl.startsWith('data:') || rawUrl.startsWith('javascript:')) {
@@ -21,9 +18,6 @@ function toProxiedUrl(rawUrl, baseUrl) {
 
 /**
  * srcset属性（レスポンシブ画像用）を書き換えるヘルパー関数
- * @param {string} srcset - 元のsrcset (例: "img-sm.jpg 1x, img-lg.jpg 2x")
- * @param {string} baseUrl - 基準となるページのURL
- * @returns {string} - プロキシされたsrcset
  */
 function rewriteSrcset(srcset, baseUrl) {
     return srcset.split(',').map(part => {
@@ -67,11 +61,7 @@ async function fetchAndRewrite(url) {
         };
 
         if (response.status >= 400) {
-            return {
-                status: response.status,
-                headers: responseHeaders,
-                data: response.data,
-            };
+            return { status: response.status, headers: responseHeaders, data: response.data };
         }
 
         // --- コンテンツタイプに応じた書き換え処理 ---
@@ -98,38 +88,53 @@ async function fetchAndRewrite(url) {
             });
             
             responseHeaders['Content-Type'] = 'text/html; charset=UTF-8';
-            return {
-                status: 200,
-                headers: responseHeaders,
-                data: $.html(),
-            };
+            return { status: 200, headers: responseHeaders, data: $.html() };
         }
 
-        // 2. JavaScript または JSON の場合 (Scratchのために新しく追加)
+        // 2. JavaScript または JSON の場合
         if (contentType.includes('javascript') || contentType.includes('json')) {
             let textData = Buffer.from(response.data).toString('utf8');
             
-            // Scratchが使いそうなURLを正規表現で探し、プロキシ経由のURLに置換する
-            const scratchUrlRegex = /https?:\/\/([a-zA-Z0-9-]+\.)*(scratch\.mit\.edu|turbowarp\.org)/g;
+            // 正規表現で "https://..." や 'https://...' 形式のURLを探す
+            const urlRegex = /(['"])(https?:\/\/[^\s"'<>]+)\1/g;
             
-            const rewrittenData = textData.replace(scratchUrlRegex, (match) => {
-                // toProxiedUrl は /proxy?url=... を返すので、それでOK
-                return toProxiedUrl(match, url);
+            let rewrittenData = textData.replace(urlRegex, (match, quote, urlInQuote) => {
+                if (urlInQuote.includes('.scratch.mit.edu') || urlInQuote.includes('.turbowarp.org')) {
+                    const proxied = toProxiedUrl(urlInQuote, url);
+                    return `${quote}${proxied}${quote}`;
+                }
+                return match;
             });
-
-            return {
-                status: 200,
-                headers: responseHeaders,
-                data: rewrittenData,
-            };
+            
+            // JSONの場合、さらに中身を再帰的に書き換える
+            if (contentType.includes('json')) {
+                try {
+                    let jsonObj = JSON.parse(rewrittenData);
+                    
+                    function traverseAndRewrite(obj) {
+                        for (let key in obj) {
+                            if (typeof obj[key] === 'string') {
+                                if (obj[key].startsWith('http') && (obj[key].includes('.scratch.mit.edu') || obj[key].includes('.turbowarp.org'))) {
+                                   obj[key] = toProxiedUrl(obj[key], url);
+                                }
+                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                                traverseAndRewrite(obj[key]);
+                            }
+                        }
+                    }
+                    
+                    traverseAndRewrite(jsonObj);
+                    rewrittenData = JSON.stringify(jsonObj);
+                } catch (e) {
+                    console.log('[Info] JSON parsing failed, using text replacement result.');
+                }
+            }
+            
+            return { status: 200, headers: responseHeaders, data: rewrittenData };
         }
 
-        // 3. 上記以外（画像、CSSなど）は、CORSヘッダーを付与してそのまま返す
-        return {
-            status: 200,
-            headers: responseHeaders,
-            data: response.data,
-        };
+        // 3. 上記以外はそのまま返す
+        return { status: 200, headers: responseHeaders, data: response.data };
 
     } catch (error) {
         console.error(`[Proxy Error] URL: ${url} | Message: ${error.message}`);
