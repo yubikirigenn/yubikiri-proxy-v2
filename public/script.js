@@ -54,12 +54,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let targetUrl = url;
-        if (!url.startsWith('http://') && !url.startsWith('https-://')) {
-            if (url.includes('.') && !url.includes(' ')) {
-                targetUrl = 'https://' + url;
+        let targetUrl = url.trim();
+
+        // URLかどうかを判定する、より安全な関数
+        function isValidHttpUrl(string) {
+            let urlObject;
+            try {
+                urlObject = new URL(string);
+            } catch (_) {
+                return false;  
+            }
+            return urlObject.protocol === "http:" || urlObject.protocol === "https:";
+        }
+
+        // もし入力が完全なURLでなければ、検索するか、https:// を補完する
+        if (!isValidHttpUrl(targetUrl)) {
+            // . が含まれ、スペースがなければ、ドメイン名と判断してhttpsを補完
+            if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
+                targetUrl = 'https://' + targetUrl;
             } else {
-                targetUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+                // それ以外はGoogle検索と判断
+                targetUrl = `https://www.google.com/search?q=${encodeURIComponent(targetUrl)}`;
             }
         }
         
@@ -75,8 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 300);
             }
             
-            // ★★★★★ この一行を変更します ★★★★★
-            // style属性に background-color を追加
             content.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-color); background-color: var(--bg-color); font-size: 1.2em; height: 100%; box-sizing: border-box;">読み込み中...</div>`;
             
             const response = await fetch(`/proxy?url=${encodeURIComponent(targetUrl)}`);
@@ -92,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('プロキシエラー:', error);
-            // エラーメッセージの背景もテーマに合わせる
             content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; background-color: var(--bg-color); font-size: 1.2em; height: 100%; box-sizing: border-box;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
             if (themeSwitchTop) themeSwitchTop.classList.remove('hidden');
             proxiedActive = false;
