@@ -3,19 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yubikiri Proxy v2.1</title>
-    <!-- CSSファイルを読み込む -->
+    <title>Yubikiri Proxy v2.2</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-
-    <!-- =================================== -->
-    <!--  テーマ切り替えスイッチ (新しく追加)  -->
-    <!-- =================================== -->
-    <div class="theme-switch" id="theme-switch" title="テーマを切り替え">
-        <div class="theme-switch-slider"></div>
-    </div>
-
+    <!-- body直下には、もうテーマスイッチはありません！ -->
 
     <!-- =================================== -->
     <!--   初期表示の大きな入力フォーム      -->
@@ -30,12 +22,12 @@
     <!-- =================================== -->
     <!--  検索後に表示される小さな上部バー    -->
     <!-- =================================== -->
-  <div id="top-small">
+    <div id="top-small">
         <div class="top-small-content">
             <input type="text" id="url-input-small" placeholder="URLを入力...">
             <button id="fetch-button-small">Go</button>
             
-            <!-- ★★★ テーマスイッチを、body直下からここへ移動！ ★★★ -->
+            <!-- ★★★ テーマスイッチは、ここにだけ存在します ★★★ -->
             <div class="theme-switch" id="theme-switch" title="テーマを切り替え">
                 <div class="theme-switch-slider"></div>
             </div>
@@ -53,7 +45,7 @@
     <!--          バージョン表示             -->
     <!-- =================================== -->
     <div class="version-label">
-        v2.1.0
+        v2.2.0
     </div>
 
 
