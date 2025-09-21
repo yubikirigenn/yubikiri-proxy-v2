@@ -30,15 +30,25 @@ function rewriteSrcset(srcset, baseUrl) {
  */
 async function fetchAndRewrite(url) {
     try {
-        const response = await axios.get(url, {
+          const response = await axios.get(url, {
             responseType: 'arraybuffer',
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36',
-                // Acceptヘッダーをより寛容にすることで、様々なコンテンツタイプに対応
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                // User-Agentを最新のChromeのものに更新
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+                // Acceptヘッダーを、実際のブラウザが送るものに近づける
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
+                // Sec-Fetch-* ヘッダー群は、ブラウザからのリクエストであることを示す重要な情報
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Upgrade-Insecure-Requests': '1',
+                // Refererヘッダーを追加。Googleから来たように見せかける（サイトによっては逆効果の場合もある）
+                'Referer': 'https://www.google.com/'
             },
-            validateStatus: () => true, // 4xx, 5xxエラーもレスポンスとして受け取る
+            validateStatus: () => true,
         });
 
         const contentType = response.headers['content-type'] || '';
