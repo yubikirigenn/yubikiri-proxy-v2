@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initTopBarAutoHide = () => {
         document.addEventListener('mousemove', (e) => {
             if (!proxiedActive) return;
-            if (e.clientY <= 80) {
+            if (e.clientY <= 50) {
                 clearTimeout(hideTimer);
                 setTopSmallVisible(true);
             } else {
