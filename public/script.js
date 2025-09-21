@@ -11,12 +11,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttonLarge = document.getElementById('fetch-button-large');
     const inputSmall = document.getElementById('url-input-small');
     const buttonSmall = document.getElementById('fetch-button-small');
+    // ★ テーマ切り替えボタンの要素もここで取得
+    const themeSwitch = document.getElementById('theme-switch');
 
-    // --- 関数定義 ---
-
+    // ==========================================================
+    //  機能1：テーマ切り替え機能
+    // ==========================================================
+    
     /**
-     * 上部バーの表示/非表示を制御する関数
+     * 指定されたテーマを適用し、設定をlocalStorageに保存する関数
+     * @param {string} theme - 'light' または 'dark'
      */
+    const applyTheme = (theme) => {
+        if (theme === 'light') {
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('light-theme');
+        }
+        localStorage.setItem('theme', theme);
+    };
+
+    // テーマ切り替えボタンのクリックイベントを設定
+    if (themeSwitch) {
+        themeSwitch.addEventListener('click', () => {
+            const isLight = document.body.classList.contains('light-theme');
+            applyTheme(isLight ? 'dark' : 'light');
+        });
+    }
+
+    // ==========================================================
+    //  機能2：プロキシとUI制御機能
+    // ==========================================================
+
     const setTopSmallVisible = (visible) => {
         if (!topSmall) return;
         if (visible) {
@@ -26,10 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /**
-     * URLをプロキシ経由で取得し、divに内容を注入するメイン関数
-     * (この関数は省略されていませんでした)
-     */
     const loadInProxy = async (url) => {
         if (!url || !url.trim()) {
             alert('URLを入力してください。');
@@ -66,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const html = await response.text();
             content.innerHTML = html;
-
             setTopSmallVisible(true);
 
         } catch (error) {
@@ -81,10 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /**
-     * 上部バーの自動表示/非表示イベントを初期化する関数
-     * (この関数は省略されていませんでした)
-     */
     const initTopBarAutoHide = () => {
         document.addEventListener('mousemove', (e) => {
             if (!proxiedActive) return;
@@ -103,72 +120,59 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    /**
-     * content div内のクリックを監視し、リンククリックを乗っ取る関数
-     * (この関数は新しく追加したものです)
-     */
     const initLinkHijacking = () => {
         content.addEventListener('click', (event) => {
             let targetElement = event.target;
             for (let i = 0; i < 5; i++) {
                 if (targetElement && targetElement.tagName === 'A') break;
-                if (!targetElement || targetElement === content) {
-                    targetElement = null;
-                    break;
-                }
+                if (!targetElement || targetElement === content) { targetElement = null; break; }
                 targetElement = targetElement.parentElement;
             }
 
             if (targetElement) {
                 event.preventDefault();
                 const proxiedUrl = targetElement.getAttribute('href');
-                
                 if (proxiedUrl && proxiedUrl.startsWith('/proxy?url=')) {
                     try {
                         const decodedUrl = decodeURIComponent(proxiedUrl.substring('/proxy?url='.length));
                         if (inputSmall) inputSmall.value = decodedUrl;
                         if (inputLarge) inputLarge.value = decodedUrl;
                         loadInProxy(decodedUrl);
-                    } catch (e) {
-                        console.error('URLのデコードに失敗:', e);
-                    }
+                    } catch (e) { console.error('URLのデコードに失敗:', e); }
                 } else {
-                    // 外部リンクやmailto:などを新しいタブで開く
                     if (proxiedUrl && (proxiedUrl.startsWith('http') || proxiedUrl.startsWith('mailto:'))) {
                         window.open(proxiedUrl, '_blank');
                     }
-                    console.log('処理できないリンクです:', proxiedUrl);
                 }
             }
         });
     };
 
     // --- イベントリスナーの設定 ---
-    // ★★★★★ おそらく、この部分が私の前回の説明で省略されていました ★★★★★
-    
-    // 大きな入力フォームのイベントリスナー
     if (buttonLarge && inputLarge) {
         buttonLarge.addEventListener('click', () => loadInProxy(inputLarge.value));
         inputLarge.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') loadInProxy(inputLarge.value);
         });
     }
-
-    // 小さな入力フォームのイベントリスナー
     if (buttonSmall && inputSmall) {
         buttonSmall.addEventListener('click', () => loadInProxy(inputSmall.value));
         inputSmall.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') loadInProxy(inputSmall.value);
         });
     }
-
-    // 2つの入力欄の値を同期させるイベントリスナー
     if(inputLarge && inputSmall){
         inputLarge.addEventListener('input', () => { inputSmall.value = inputLarge.value; });
         inputSmall.addEventListener('input', () => { inputLarge.value = inputLarge.value; });
     }
 
     // --- 初期化処理 ---
+
+    // 最初に、保存されたテーマを適用する
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    applyTheme(savedTheme);
+
+    // 次に、各種イベントを初期化する
     initTopBarAutoHide();
     initLinkHijacking();
 });
