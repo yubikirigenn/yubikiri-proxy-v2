@@ -1,9 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { isBlocked } = require('./blocklist.js');
 
-/**
- * URLをプロキシ経由の絶対URLに変換するヘルパー関数
- */
 function toProxiedUrl(rawUrl, baseUrl) {
     if (!rawUrl || rawUrl.startsWith('data:') || rawUrl.startsWith('javascript:')) {
         return rawUrl;
@@ -16,9 +14,6 @@ function toProxiedUrl(rawUrl, baseUrl) {
     }
 }
 
-/**
- * srcset属性（レスポンシブ画像用）を書き換えるヘルパー関数
- */
 function rewriteSrcset(srcset, baseUrl) {
     return srcset.split(',').map(part => {
         const item = part.trim().split(/\s+/);
@@ -28,12 +23,17 @@ function rewriteSrcset(srcset, baseUrl) {
     }).join(', ');
 }
 
-/**
- * 外部URLからコンテンツを取得し、必要に応じて内容を書き換えるメイン関数
- * @param {string} url - ターゲットのURL
- * @returns {Promise<object>} - { status: number, headers: object, data: Buffer|string }
- */
 async function fetchAndRewrite(url) {
+    // 最初に、リクエストされたURLがブロック対象かをチェック
+    if (isBlocked(url)) {
+        console.log(`[AdBlock] Blocked URL: ${url}`);
+        return {
+            status: 204, // No Content
+            headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+            data: '',
+        };
+    }
+
     try {
         const response = await axios.get(url, {
             responseType: 'arraybuffer',
@@ -41,13 +41,10 @@ async function fetchAndRewrite(url) {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                 'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1',
-                'Upgrade-Insecure-Requests': '1',
-                'Referer': 'https://www.google.com/'
+                'Accept-Language': 'ja,en-US;q=0.9,en',
+                'Connection': 'keep-alive',
+                'DNT': '1',
+                'Sec-GPC': '1',
             },
             validateStatus: () => true,
         });
@@ -64,13 +61,9 @@ async function fetchAndRewrite(url) {
             return { status: response.status, headers: responseHeaders, data: response.data };
         }
 
-        // --- コンテンツタイプに応じた書き換え処理 ---
-
-        // 1. HTMLの場合
         if (contentType.includes('text/html')) {
             const html = Buffer.from(response.data).toString('utf8');
             const $ = cheerio.load(html);
-
             $('a, link, form').each((i, el) => {
                 const $el = $(el);
                 const href = $el.attr('href');
@@ -78,7 +71,6 @@ async function fetchAndRewrite(url) {
                 const action = $el.attr('action');
                 if (action) $el.attr('action', toProxiedUrl(action, url));
             });
-
             $('img, script, iframe, video, audio, source').each((i, el) => {
                 const $el = $(el);
                 const src = $el.attr('src');
@@ -86,31 +78,22 @@ async function fetchAndRewrite(url) {
                 const srcset = $el.attr('srcset');
                 if (srcset) $el.attr('srcset', rewriteSrcset(srcset, url));
             });
-            
             responseHeaders['Content-Type'] = 'text/html; charset=UTF-8';
             return { status: 200, headers: responseHeaders, data: $.html() };
         }
 
-        // 2. JavaScript または JSON の場合
         if (contentType.includes('javascript') || contentType.includes('json')) {
             let textData = Buffer.from(response.data).toString('utf8');
-            
-            // 正規表現で "https://..." や 'https://...' 形式のURLを探す
             const urlRegex = /(['"])(https?:\/\/[^\s"'<>]+)\1/g;
-            
             let rewrittenData = textData.replace(urlRegex, (match, quote, urlInQuote) => {
                 if (urlInQuote.includes('.scratch.mit.edu') || urlInQuote.includes('.turbowarp.org')) {
-                    const proxied = toProxiedUrl(urlInQuote, url);
-                    return `${quote}${proxied}${quote}`;
+                    return `${quote}${toProxiedUrl(urlInQuote, url)}${quote}`;
                 }
                 return match;
             });
-            
-            // JSONの場合、さらに中身を再帰的に書き換える
             if (contentType.includes('json')) {
                 try {
                     let jsonObj = JSON.parse(rewrittenData);
-                    
                     function traverseAndRewrite(obj) {
                         for (let key in obj) {
                             if (typeof obj[key] === 'string') {
@@ -122,18 +105,13 @@ async function fetchAndRewrite(url) {
                             }
                         }
                     }
-                    
                     traverseAndRewrite(jsonObj);
                     rewrittenData = JSON.stringify(jsonObj);
-                } catch (e) {
-                    console.log('[Info] JSON parsing failed, using text replacement result.');
-                }
+                } catch (e) { console.log('[Info] JSON parsing failed, using text replacement result.'); }
             }
-            
             return { status: 200, headers: responseHeaders, data: rewrittenData };
         }
-
-        // 3. 上記以外はそのまま返す
+        
         return { status: 200, headers: responseHeaders, data: response.data };
 
     } catch (error) {
