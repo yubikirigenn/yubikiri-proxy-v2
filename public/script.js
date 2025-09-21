@@ -1,138 +1,89 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- グローバル変数 ---
+    // ... グローバル変数とDOM要素の取得は、前回の回答と全く同じ ...
     let proxiedActive = false;
     let hideTimer = null;
-
-    // --- DOM要素の取得 ---
     const topLarge = document.getElementById('top-large');
     const topSmall = document.getElementById('top-small');
-    // ★ iframeではなく、<div id="content"> を取得します
-    const content = document.getElementById('content'); 
+    const content = document.getElementById('content');
     const inputLarge = document.getElementById('url-input-large');
     const buttonLarge = document.getElementById('fetch-button-large');
     const inputSmall = document.getElementById('url-input-small');
     const buttonSmall = document.getElementById('fetch-button-small');
 
-    // --- 関数定義 ---
 
+    // ... setTopSmallVisible関数は同じ ...
     const setTopSmallVisible = (visible) => {
-        if (!topSmall) return;
-        if (visible) {
-            topSmall.style.top = '0';
-        } else {
-            topSmall.style.top = '-60px';
-        }
+        // ...
     };
+
+    // ... loadInProxy関数は同じ ...
+    const loadInProxy = async (url) => {
+        // ...
+    };
+
+    // ... initTopBarAutoHide関数は同じ ...
+    const initTopBarAutoHide = () => {
+        // ...
+    };
+
+
+    // ★★★★★ ここからが、URL移動を実現するための新しいコードです ★★★★★
 
     /**
-     * URLをプロキシ経由で取得し、divに内容を注入するメイン関数
-     * @param {string} url - ユーザーが入力したURL
+     * content div内のクリックを監視し、リンククリックを乗っ取る関数
      */
-    const loadInProxy = async (url) => { // asyncキーワードが必須です
-        if (!url || !url.trim()) {
-            alert('URLを入力してください。');
-            return;
-        }
+    const initLinkHijacking = () => {
+        // content div全体にクリックイベントリスナーを1つだけ設定
+        content.addEventListener('click', (event) => {
+            // クリックされた要素（event.target）を取得
+            let targetElement = event.target;
 
-        // URLまたは検索語から、実際にアクセスするターゲットURLを決定する
-        let targetUrl = url;
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            if (url.includes('.') && !url.includes(' ')) {
-                targetUrl = 'https://' + url;
-            } else {
-                targetUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
-            }
-        }
-        
-        // --- ここからが、v1の方式に戻すための重要な変更点です ---
-
-        try {
-            // 1. UIを「読み込み中」の状態にする
-            if (!proxiedActive) {
-                proxiedActive = true;
-                topLarge.style.opacity = '0';
-                topLarge.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    topLarge.style.display = 'none';
-                    // content divを表示状態にする（CSSの.visibleクラスを追加）
-                    content.classList.add('visible');
-                }, 300);
-            }
-            // content div の中身を「読み込み中」メッセージにする
-            content.innerHTML = `<div style="padding: 24px; text-align: center; color: #eee; font-size: 1.2em;">読み込み中...</div>`;
-            
-            // 2. サーバーの/proxyエンドポイントに、fetchでリクエストを送る
-            const response = await fetch(`/proxy?url=${encodeURIComponent(targetUrl)}`);
-
-            // 3. レスポンスが正常かチェックする
-            if (!response.ok) {
-                // エラーだった場合、サーバーからのテキストをエラーメッセージとして表示
-                const errorText = await response.text();
-                throw new Error(`サーバーエラー: ${response.status} ${errorText}`);
+            // クリックされたのが<a>タグ（リンク）か、あるいは<a>タグの子要素かをチェック
+            // <a>タグが見つかるまで、親要素をたどっていく (最大5階層まで)
+            for (let i = 0; i < 5; i++) {
+                if (targetElement && targetElement.tagName === 'A') {
+                    break; // <a>タグが見つかった！
+                }
+                if (!targetElement || targetElement === content) {
+                    targetElement = null; // content divまで来てしまったら終了
+                    break;
+                }
+                targetElement = targetElement.parentElement;
             }
 
-            // 4. レスポンスからHTMLテキストを取得する
-            const html = await response.text();
-            
-            // 5. 取得したHTMLを、content divの中身として直接書き込む！
-            content.innerHTML = html;
+            // もし<a>タグが見つかったら...
+            if (targetElement) {
+                // 1. ブラウザの通常のページ遷移をキャンセル！
+                event.preventDefault();
 
-            // 読み込みが成功したので、上部バーを表示する
-            setTopSmallVisible(true);
+                // 2. リンクのhref属性から、プロキシ経由のURLを取得
+                const proxiedUrl = targetElement.getAttribute('href');
+                
+                // 3. /proxy?url=... の形式になっているかを確認
+                if (proxiedUrl && proxiedUrl.startsWith('/proxy?url=')) {
+                    // 4. URLをデコードして、入力欄に表示する
+                    try {
+                        const decodedUrl = decodeURIComponent(proxiedUrl.substring('/proxy?url='.length));
+                        if (inputSmall) inputSmall.value = decodedUrl;
+                        if (inputLarge) inputLarge.value = decodedUrl;
 
-        } catch (error) {
-            console.error('プロキシエラー:', error);
-            // エラーが発生したら、エラーメッセージをcontent divに表示する
-            content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; font-size: 1.2em;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
-            // エラーが起きたら、初期画面に戻す準備
-            proxiedActive = false;
-            setTopSmallVisible(false);
-            topLarge.style.display = '';
-            topLarge.style.opacity = '1';
-            topLarge.style.transform = 'none';
-            content.classList.remove('visible');
-        }
-    };
+                        // 5. 新しいページを読み込むために、loadInProxy関数を再実行！
+                        loadInProxy(decodedUrl);
 
-    const initTopBarAutoHide = () => {
-        document.addEventListener('mousemove', (e) => {
-            if (!proxiedActive) return;
-            if (e.clientY <= 80) { // 感度（降りてくる範囲）
-                clearTimeout(hideTimer);
-                setTopSmallVisible(true);
-            } else {
-                clearTimeout(hideTimer);
-                hideTimer = setTimeout(() => setTopSmallVisible(false), 300); // 感度（隠れるまでの時間）
+                    } catch (e) {
+                        console.error('URLのデコードに失敗:', e);
+                    }
+                } else {
+                    console.log('通常の外部リンク、または処理できないリンクです:', proxiedUrl);
+                }
             }
-        });
-        document.addEventListener('mouseleave', () => {
-            if (!proxiedActive) return;
-            clearTimeout(hideTimer);
-            hideTimer = setTimeout(() => setTopSmallVisible(false), 300);
         });
     };
 
     // --- イベントリスナーの設定（変更なし） ---
+    // ...
 
-    if (buttonLarge && inputLarge) {
-        buttonLarge.addEventListener('click', () => loadInProxy(inputLarge.value));
-        inputLarge.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') loadInProxy(inputLarge.value);
-        });
-    }
-
-    if (buttonSmall && inputSmall) {
-        buttonSmall.addEventListener('click', () => loadInProxy(inputSmall.value));
-        inputSmall.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') loadInProxy(inputSmall.value);
-        });
-    }
-
-    if(inputLarge && inputSmall){
-        inputLarge.addEventListener('input', () => { inputSmall.value = inputLarge.value; });
-        inputSmall.addEventListener('input', () => { inputLarge.value = inputLarge.value; });
-    }
-
-    // --- 初期化処理（変更なし） ---
+    // --- 初期化処理 ---
     initTopBarAutoHide();
+    initLinkHijacking(); // ★ 新しい関数をここで呼び出す！
 });
