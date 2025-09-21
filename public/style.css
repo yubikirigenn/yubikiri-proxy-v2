@@ -27,8 +27,8 @@ body.light-theme {
   --input-bg-gradient-start: #fff;
   --input-bg-gradient-end: #f5f5f5;
   --input-border-color: #ccc;
-  --button-text-color: #fff; /* ★ ボタンの文字色を白に変更 */
-  --button-bg-gradient-start: #007bff; /* ★ ボタンの色を青系に変更 */
+  --button-text-color: #fff;
+  --button-bg-gradient-start: #007bff;
   --button-bg-gradient-end: #0056b3;
   --button-shadow-color: #00418a;
   --top-bar-bg: rgba(255, 255, 255, 0.85);
@@ -43,20 +43,42 @@ body {
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
 }
-#top-large { text-align: center; margin-top: 100px; transition: opacity 0.3s ease, transform 0.3s ease; }
-#top-large h1 { font-size: 64px; margin-bottom: 40px; color: var(--title-color); text-shadow: 0 3px 6px var(--shadow-color-heavy); }
-#top-large input { width: 400px; padding: 12px; font-size: 18px; border-radius: 8px; transition: all 0.2s ease; background: linear-gradient(to bottom, var(--input-bg-gradient-start), var(--input-bg-gradient-end)); color: var(--text-color); border: 1px solid var(--input-border-color); box-shadow: inset 0 3px 6px var(--shadow-color-heavy); }
-#top-large input:focus { border-color: #aaa; outline: none; }
 
-/* ★★★ #top-large button のスタイルをテーマ変数を使うように修正 ★★★ */
-#top-large button { 
-  padding: 12px 20px; 
-  font-size: 18px; 
-  border-radius: 8px; 
-  font-weight: bold; 
-  cursor: pointer; 
-  transition: all 0.2s ease; 
-  position: relative; 
+/* --- トップページ（大きなフォーム）のスタイル --- */
+#top-large {
+  text-align: center;
+  margin-top: 100px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#top-large h1 {
+  font-size: 64px;
+  margin-bottom: 40px;
+  color: var(--title-color);
+  text-shadow: 0 3px 6px var(--shadow-color-heavy);
+}
+#top-large input {
+  width: 400px;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: linear-gradient(to bottom, var(--input-bg-gradient-start), var(--input-bg-gradient-end));
+  color: var(--text-color);
+  border: 1px solid var(--input-border-color);
+  box-shadow: inset 0 3px 6px var(--shadow-color-heavy);
+}
+#top-large input:focus {
+  border-color: #aaa;
+  outline: none;
+}
+#top-large button {
+  padding: 12px 20px;
+  font-size: 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
   margin-left: 8px;
   background: linear-gradient(to bottom, var(--button-bg-gradient-start), var(--button-bg-gradient-end));
   color: var(--button-text-color);
@@ -64,30 +86,135 @@ body {
   box-shadow: 0 6px 0 var(--button-shadow-color), 0 8px 12px var(--shadow-color-medium);
 }
 
-/* --- ボタンのアクティブ/ホバーエフェクト --- */
+/* --- ボタンのホバー＆クリックエフェクト --- */
 #top-large button:hover, #top-small button:hover {
-    transform: translateY(-1px); /* 少し浮き上がるように変更 */
+    transform: translateY(-1px);
     box-shadow: 0 8px 0 var(--button-shadow-color), 0 10px 15px var(--shadow-color-medium);
 }
 #top-large button:active, #top-small button:active {
-    transform: translateY(2px); /* へこむ */
+    transform: translateY(2px);
     box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
 }
 
-/* --- top-small とその中身 --- */
-#top-small { position: fixed; top: -60px; left: 0; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 6px 12px; box-shadow: 0 2px 6px var(--shadow-color-heavy); transition: top 0.3s ease; z-index: 1000; background: var(--top-bar-bg); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(128,128,128,0.2); height: 48px; box-sizing: border-box; }
-.top-small-content { display: flex; width: 100%; max-width: 800px; gap: 8px; align-items: center; }
-#top-small input { flex: 1; height: 36px; padding: 0 12px; font-size: 16px; border-radius: 8px; border: 1px solid var(--input-border-color); background: linear-gradient(to bottom, var(--input-bg-gradient-end), var(--input-bg-gradient-start)); color: var(--text-color); transition: all 0.2s ease; }
-#top-small input:focus { border-color: #ccc; outline: none; }
-#top-small button { height: 36px; padding: 0 16px; font-size: 16px; font-weight: bold; border-radius: 8px; border: 1px solid var(--button-shadow-color); background: linear-gradient(to bottom, var(--button-bg-gradient-start), var(--button-bg-gradient-end)); color: var(--button-text-color); box-shadow: 0 4px 0 var(--button-shadow-color), 0 5px 8px var(--shadow-color-medium); cursor: pointer; transition: all 0.2s ease; position: relative; }
+/* --- サイト表示中の上部バーのスタイル --- */
+#top-small {
+  position: fixed;
+  top: -60px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  box-shadow: 0 2px 6px var(--shadow-color-heavy);
+  transition: top 0.3s ease;
+  z-index: 1000;
+  background: var(--top-bar-bg);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(128,128,128,0.2);
+  height: 48px;
+  box-sizing: border-box;
+}
+.top-small-content {
+  display: flex;
+  width: 100%;
+  max-width: 800px;
+  gap: 8px;
+  align-items: center;
+}
+#top-small input {
+  flex: 1;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border-color);
+  background: linear-gradient(to bottom, var(--input-bg-gradient-end), var(--input-bg-gradient-start));
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+#top-small input:focus {
+  border-color: #ccc;
+  outline: none;
+}
+#top-small button {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 1px solid var(--button-shadow-color);
+  background: linear-gradient(to bottom, var(--button-bg-gradient-start), var(--button-bg-gradient-end));
+  color: var(--button-text-color);
+  box-shadow: 0 4px 0 var(--button-shadow-color), 0 5px 8px var(--shadow-color-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
 
-/* --- テーマ切り替えスイッチ --- */
-.theme-switch { position: relative; width: 50px; height: 26px; background-color: var(--input-bg-gradient-end); border: 1px solid var(--input-border-color); border-radius: 13px; cursor: pointer; z-index: 1001; flex-shrink: 0; }
-.theme-switch-slider { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: var(--button-bg-gradient-start); border-radius: 50%; transition: transform 0.3s; }
-body.light-theme .theme-switch-slider { transform: translateX(24px); }
+/* --- テーマ切り替えスイッチのスタイル --- */
+.theme-switch {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  background-color: var(--input-bg-gradient-end);
+  border: 1px solid var(--input-border-color);
+  border-radius: 13px;
+  cursor: pointer;
+  z-index: 1001;
+  flex-shrink: 0;
+}
+.theme-switch-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--button-bg-gradient-start);
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+body.light-theme .theme-switch-slider {
+  transform: translateX(24px);
+}
+.theme-switch-top {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  transition: opacity 0.3s;
+}
+.theme-switch-top.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
-/* --- content と version-label --- */
-#content { visibility: hidden; opacity: 0; transition: opacity 0.3s ease; height: 100vh; box-sizing: border-box; }
-#content.visible { visibility: visible; opacity: 1; }
-#content div { width: 100%; height: 100%; border: none; background: var(--iframe-bg); }
-.version-label { position: fixed; bottom: 10px; right: 14px; font-size: 14px; color: rgba(128, 128, 128, 0.5); pointer-events: none; user-select: none; }
+/* --- コンテンツ表示エリアとバージョンラベル --- */
+#content {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  height: 100vh;
+  box-sizing: border-box;
+}
+#content.visible {
+  visibility: visible;
+  opacity: 1;
+}
+#content > div {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--iframe-bg);
+  overflow: auto;
+}
+.version-label {
+  position: fixed;
+  bottom: 10px;
+  right: 14px;
+  font-size: 14px;
+  color: rgba(128, 128, 128, 0.5);
+  pointer-events: none;
+  user-select: none;
+  z-index: 1002;
+}

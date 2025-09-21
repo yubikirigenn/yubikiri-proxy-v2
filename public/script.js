@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let hideTimer = null;
 
     // --- DOM要素の取得 ---
+    const themeSwitchTop = document.getElementById('theme-switch-top');
+    const themeSwitchBar = document.getElementById('theme-switch-bar');
     const topLarge = document.getElementById('top-large');
     const topSmall = document.getElementById('top-small');
     const content = document.getElementById('content');
@@ -11,17 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttonLarge = document.getElementById('fetch-button-large');
     const inputSmall = document.getElementById('url-input-small');
     const buttonSmall = document.getElementById('fetch-button-small');
-    // ★ テーマ切り替えボタンの要素もここで取得
-    const themeSwitch = document.getElementById('theme-switch');
 
     // ==========================================================
     //  機能1：テーマ切り替え機能
     // ==========================================================
     
-    /**
-     * 指定されたテーマを適用し、設定をlocalStorageに保存する関数
-     * @param {string} theme - 'light' または 'dark'
-     */
     const applyTheme = (theme) => {
         if (theme === 'light') {
             document.body.classList.add('light-theme');
@@ -31,13 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('theme', theme);
     };
 
-    // テーマ切り替えボタンのクリックイベントを設定
-    if (themeSwitch) {
-        themeSwitch.addEventListener('click', () => {
-            const isLight = document.body.classList.contains('light-theme');
-            applyTheme(isLight ? 'dark' : 'light');
-        });
-    }
+    const handleThemeSwitch = () => {
+        const isLight = document.body.classList.contains('light-theme');
+        applyTheme(isLight ? 'dark' : 'light');
+    };
+
+    if (themeSwitchTop) themeSwitchTop.addEventListener('click', handleThemeSwitch);
+    if (themeSwitchBar) themeSwitchBar.addEventListener('click', handleThemeSwitch);
 
     // ==========================================================
     //  機能2：プロキシとUI制御機能
@@ -70,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (!proxiedActive) {
                 proxiedActive = true;
+                if (themeSwitchTop) themeSwitchTop.classList.add('hidden'); // トップページ用スイッチを隠す
                 topLarge.style.opacity = '0';
                 topLarge.style.transform = 'scale(0.9)';
                 setTimeout(() => {
@@ -77,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     content.classList.add('visible');
                 }, 300);
             }
-            content.innerHTML = `<div style="padding: 24px; text-align: center; color: #eee; font-size: 1.2em;">読み込み中...</div>`;
+            content.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-color); font-size: 1.2em;">読み込み中...</div>`;
             
             const response = await fetch(`/proxy?url=${encodeURIComponent(targetUrl)}`);
 
@@ -93,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('プロキシエラー:', error);
             content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; font-size: 1.2em;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
+            if (themeSwitchTop) themeSwitchTop.classList.remove('hidden'); // エラー時はスイッチを再表示
             proxiedActive = false;
             setTopSmallVisible(false);
             topLarge.style.display = '';
@@ -167,12 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 初期化処理 ---
-
-    // 最初に、保存されたテーマを適用する
     const savedTheme = localStorage.getItem('theme') || 'dark';
     applyTheme(savedTheme);
-
-    // 次に、各種イベントを初期化する
     initTopBarAutoHide();
     initLinkHijacking();
 });

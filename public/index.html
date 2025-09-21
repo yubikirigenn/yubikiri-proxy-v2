@@ -3,55 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yubikiri Proxy v2.2</title>
+    <title>Yubikiri Proxy v2.3</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <!-- body直下には、もうテーマスイッチはありません！ -->
 
-    <!-- =================================== -->
-    <!--   初期表示の大きな入力フォーム      -->
-    <!-- =================================== -->
+    <!-- トップページ（初期画面）用のテーマ切り替えスイッチ -->
+    <div class="theme-switch theme-switch-top" id="theme-switch-top" title="テーマを切り替え">
+        <div class="theme-switch-slider"></div>
+    </div>
+
+    <!-- 初期表示の大きな入力フォーム -->
     <div id="top-large">
         <h1>Yubikiri Proxy</h1>
         <input type="text" id="url-input-large" placeholder="表示したいページのURLを入力">
         <button id="fetch-button-large">Go</button>
     </div>
 
-
-    <!-- =================================== -->
-    <!--  検索後に表示される小さな上部バー    -->
-    <!-- =================================== -->
+    <!-- 検索後に表示される小さな上部バー -->
     <div id="top-small">
         <div class="top-small-content">
             <input type="text" id="url-input-small" placeholder="URLを入力...">
             <button id="fetch-button-small">Go</button>
             
-            <!-- ★★★ テーマスイッチは、ここにだけ存在します ★★★ -->
-            <div class="theme-switch" id="theme-switch" title="テーマを切り替え">
+            <!-- サイト表示中、上部バーに追従するテーマ切り替えスイッチ -->
+            <div class="theme-switch" id="theme-switch-bar" title="テーマを切り替え">
                 <div class="theme-switch-slider"></div>
             </div>
         </div>
     </div>
 
-
-    <!-- =================================== -->
-    <!--   プロキシ結果を表示するコンテナ    -->
-    <!-- =================================== -->
+    <!-- プロキシ結果を表示するコンテナ -->
     <div id="content"></div>
 
-
-    <!-- =================================== -->
-    <!--          バージョン表示             -->
-    <!-- =================================== -->
+    <!-- バージョン表示 -->
     <div class="version-label">
-        v2.2.0
+        v2.3.0
     </div>
 
-
-    <!-- =================================== -->
-    <!--    JavaScriptファイルを読み込む     -->
-    <!-- =================================== -->
+    <!-- JavaScriptファイルを読み込む -->
     <script src="/script.js"></script>
 
 </body>
