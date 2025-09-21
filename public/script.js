@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- グローバル変数 ---
-    let proxiedActive = false; // プロキシでページが表示されているかを管理するフラグ
-    let hideTimer = null; // バーを非表示にするためのタイマー
+    let proxiedActive = false;
+    let hideTimer = null;
 
     // --- DOM要素の取得 ---
     const topLarge = document.getElementById('top-large');
     const topSmall = document.getElementById('top-small');
-    const content = document.getElementById('content');
-    const resultFrame = document.getElementById('result-frame');
+    // ★ iframeではなく、<div id="content"> を取得します
+    const content = document.getElementById('content'); 
     const inputLarge = document.getElementById('url-input-large');
     const buttonLarge = document.getElementById('fetch-button-large');
     const inputSmall = document.getElementById('url-input-small');
@@ -15,30 +15,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 関数定義 ---
 
-    /**
-     * 上部バーの表示/非表示を制御する関数
-     * @param {boolean} visible - 表示する場合はtrue, 非表示はfalse
-     */
     const setTopSmallVisible = (visible) => {
         if (!topSmall) return;
         if (visible) {
             topSmall.style.top = '0';
         } else {
-            // CSSで定義された高さ(-60px)まで押し上げる
-            topSmall.style.top = '-60px'; 
+            topSmall.style.top = '-60px';
         }
     };
 
     /**
-     * URLをプロキシ経由でiframeに読み込むメイン関数
+     * URLをプロキシ経由で取得し、divに内容を注入するメイン関数
      * @param {string} url - ユーザーが入力したURL
      */
-    const loadInProxy = (url) => {
+    const loadInProxy = async (url) => { // asyncキーワードが必須です
         if (!url || !url.trim()) {
             alert('URLを入力してください。');
             return;
         }
 
+        // URLまたは検索語から、実際にアクセスするターゲットURLを決定する
         let targetUrl = url;
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
             if (url.includes('.') && !url.includes(' ')) {
@@ -48,39 +44,67 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        resultFrame.src = `/proxy?url=${encodeURIComponent(targetUrl)}`;
+        // --- ここからが、v1の方式に戻すための重要な変更点です ---
 
-        if (topLarge && content && !content.classList.contains('visible')) {
-            proxiedActive = true; // ★プロキシが有効になったことを記録
-            topLarge.style.opacity = '0';
-            topLarge.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                topLarge.style.display = 'none';
-                content.classList.add('visible');
-            }, 300);
+        try {
+            // 1. UIを「読み込み中」の状態にする
+            if (!proxiedActive) {
+                proxiedActive = true;
+                topLarge.style.opacity = '0';
+                topLarge.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    topLarge.style.display = 'none';
+                    // content divを表示状態にする（CSSの.visibleクラスを追加）
+                    content.classList.add('visible');
+                }, 300);
+            }
+            // content div の中身を「読み込み中」メッセージにする
+            content.innerHTML = `<div style="padding: 24px; text-align: center; color: #eee; font-size: 1.2em;">読み込み中...</div>`;
+            
+            // 2. サーバーの/proxyエンドポイントに、fetchでリクエストを送る
+            const response = await fetch(`/proxy?url=${encodeURIComponent(targetUrl)}`);
+
+            // 3. レスポンスが正常かチェックする
+            if (!response.ok) {
+                // エラーだった場合、サーバーからのテキストをエラーメッセージとして表示
+                const errorText = await response.text();
+                throw new Error(`サーバーエラー: ${response.status} ${errorText}`);
+            }
+
+            // 4. レスポンスからHTMLテキストを取得する
+            const html = await response.text();
+            
+            // 5. 取得したHTMLを、content divの中身として直接書き込む！
+            content.innerHTML = html;
+
+            // 読み込みが成功したので、上部バーを表示する
+            setTopSmallVisible(true);
+
+        } catch (error) {
+            console.error('プロキシエラー:', error);
+            // エラーが発生したら、エラーメッセージをcontent divに表示する
+            content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; font-size: 1.2em;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
+            // エラーが起きたら、初期画面に戻す準備
+            proxiedActive = false;
+            setTopSmallVisible(false);
+            topLarge.style.display = '';
+            topLarge.style.opacity = '1';
+            topLarge.style.transform = 'none';
+            content.classList.remove('visible');
         }
     };
 
-    /**
-     * 上部バーの自動表示/非表示イベントを初期化する関数
-     */
     const initTopBarAutoHide = () => {
         document.addEventListener('mousemove', (e) => {
-            // このフラグがtrueの時だけ自動表示/非表示を有効にする
             if (!proxiedActive) return;
-
-            // 画面の上端40px以内に入ったら
-            if (e.clientY <= 67) {
-                clearTimeout(hideTimer); // 非表示タイマーをキャンセル
-                setTopSmallVisible(true); // バーを表示
+            if (e.clientY <= 80) { // 感度（降りてくる範囲）
+                clearTimeout(hideTimer);
+                setTopSmallVisible(true);
             } else {
-                clearTimeout(hideTimer); // 既存のタイマーをリセット
-                // 700ミリ秒後にバーを隠すタイマーをセット
-                hideTimer = setTimeout(() => setTopSmallVisible(false), 300);
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(() => setTopSmallVisible(false), 300); // 感度（隠れるまでの時間）
             }
         });
-
-        // マウスがウィンドウから離れた時の処理
         document.addEventListener('mouseleave', () => {
             if (!proxiedActive) return;
             clearTimeout(hideTimer);
@@ -88,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- イベントリスナーの設定 ---
+    // --- イベントリスナーの設定（変更なし） ---
 
     if (buttonLarge && inputLarge) {
         buttonLarge.addEventListener('click', () => loadInProxy(inputLarge.value));
@@ -109,6 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
         inputSmall.addEventListener('input', () => { inputLarge.value = inputLarge.value; });
     }
 
-    // --- 初期化処理 ---
-    initTopBarAutoHide(); // 自動表示/非表示機能を有効化
+    // --- 初期化処理（変更なし） ---
+    initTopBarAutoHide();
 });
