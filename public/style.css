@@ -33,15 +33,22 @@ body.light-theme {
   --button-shadow-color: #00418a;
   --top-bar-bg: rgba(255, 255, 255, 0.85);
   --iframe-bg: #fff;
+  background: #f0f2f5;
+  background-image: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
 }
 
-/* --- 基本スタイル --- */
 body {
   margin: 0;
   font-family: sans-serif;
-  background: var(--bg-color);
   color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
+  
+  /* --- 新しい背景 --- */
+  background: #1c1c1c; /* フォールバック用の単色背景 */
+  background-image: linear-gradient(135deg, #4a00e0 0%, #8e2de2 50%, #00c6ff 100%);
+  background-attachment: fixed; /* スクロールしても背景が動かないようにする */
+  background-size: cover;
+
+  transition: color 0.3s; /* 背景のトランジションは一旦削除 */
 }
 
 /* --- トップページ（大きなフォーム）のスタイル --- */
@@ -217,4 +224,56 @@ body.light-theme .theme-switch-slider {
   pointer-events: none;
   user-select: none;
   z-index: 1002;
+}
+
+/* style.css に以下のスタイルを追加または修正 */
+
+/* ガラス効果を適用する要素の共通スタイル */
+#top-large, #top-small {
+    /* --- Glassmorphism Core --- */
+    background: rgba(255, 255, 255, 0.1); /* 半透明の白背景 */
+    backdrop-filter: blur(12px); /* 背景ぼかし (これが核心！) */
+    -webkit-backdrop-filter: blur(12px); /* Safari対応 */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* 細い境界線 */
+    
+    /* --- 見た目の調整 --- */
+    border-radius: 16px; /* 角を少し丸くする */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* 奥行きを出す影 */
+    padding: 20px;
+}
+
+/* top-large の個別の調整 */
+#top-large {
+    width: 600px;
+    margin: 100px auto 0; /* 中央寄せ */
+    padding: 30px;
+}
+
+/* top-small はすでに fixed なので、paddingなどを調整 */
+#top-small {
+    width: auto; /* 幅は中身に合わせる */
+    max-width: 90%;
+    margin: 0 auto;
+    left: 0; right: 0; /* 中央寄せ */
+    padding: 6px 12px;
+}
+
+/* 入力欄やボタンの背景も調整 */
+#top-large input, #top-small input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#top-large button, #top-small button {
+    /* ガラスの上のボタンは、フラットな方がモダンに見える */
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: none;
+    box-shadow: none; /* 立体的な影は一旦なくす */
+    font-weight: bold;
+}
+body.light-theme #top-large button, 
+body.light-theme #top-small button {
+    background: #007bff;
+    color: #fff;
 }
