@@ -69,8 +69,20 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; color: var(--text-color);
 }
 .top-small-content { display: flex; width: 90%; max-width: 800px; gap: 8px; align-items: center; }
 
-/* 上部バーの入力欄とボタンのサイズ・フォントを指定 */
-#top-small input { flex: 1; height: 36px; padding: 0 12px; font-size: 16px; }
+/* ★★★★★ これが正しい修正です ★★★★★ */
+#top-small input {
+  flex: 1;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 16px;
+  /* ここでは色を指定せず、.glass-elementから継承させる */
+}
+
+/* ダークテーマの時だけ、#top-small input の文字色を #fff に上書きする */
+/* body:not(.light-theme) は「light-themeクラスが付いていないbody」= ダークテーマ を意味する */
+body:not(.light-theme) #top-small input {
+    color: #fff;
+}
 #top-small button { height: 36px; padding: 0 16px; font-size: 16px; font-weight: bold; cursor: pointer; }
 
 
