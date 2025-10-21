@@ -3,29 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yubikiri Proxy v3.0</title>
+    <title>Yubikiri Proxy v3.0 Final</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-    <!-- トップページ用テーマスイッチ -->
-    <div class="theme-switch theme-switch-top" id="theme-switch-top" title="テーマを切り替え">
+    <!-- トップページ用テーマスイッチ (glass-elementクラスを追加) -->
+    <div class="theme-switch theme-switch-top glass-element" id="theme-switch-top" title="テーマを切り替え">
         <div class="theme-switch-slider"></div>
     </div>
 
     <!-- トップページのメインパネル -->
     <div id="top-large">
         <h1>Yubikiri Proxy</h1>
-        <input type="text" id="url-input-large" placeholder="表示したいページのURLを入力">
-        <button id="fetch-button-large">Go</button>
+        <!-- glass-elementクラスを各要素に追加 -->
+        <input type="text" id="url-input-large" class="glass-element" placeholder="表示したいページのURLを入力">
+        <button id="fetch-button-large" class="glass-element">Go</button>
     </div>
 
     <!-- サイト表示中の上部バー -->
     <div id="top-small">
         <div class="top-small-content">
-            <input type="text" id="url-input-small" placeholder="URLを入力...">
-            <button id="fetch-button-small">Go</button>
-            <div class="theme-switch" id="theme-switch-bar" title="テーマを切り替え">
+            <!-- glass-elementクラスを各要素に追加 -->
+            <input type="text" id="url-input-small" class="glass-element" placeholder="URLを入力...">
+            <button id="fetch-button-small" class="glass-element">Go</button>
+            <div class="theme-switch glass-element" id="theme-switch-bar" title="テーマを切り替え">
                 <div class="theme-switch-slider"></div>
             </div>
         </div>

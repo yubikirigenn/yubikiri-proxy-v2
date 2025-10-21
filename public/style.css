@@ -5,8 +5,6 @@
   --panel-bg: rgba(30, 30, 30, 0.5); --panel-border-color: rgba(255, 255, 255, 0.1);
   --element-bg: rgba(0, 0, 0, 0.25); --element-border-color: rgba(255, 255, 255, 0.2);
   --element-hover-bg: rgba(0, 0, 0, 0.4); --element-text-color: #eee;
-  --button-bg-gradient-start: #bbb; --button-bg-gradient-end: #888;
-  --button-text-color: #222; --button-shadow-color: #555;
   --top-bar-bg: rgba(30, 30, 30, 0.5); --top-bar-border-color: rgba(255, 255, 255, 0.1);
   --shadow-color: rgba(0, 0, 0, 0.3);
 }
@@ -16,8 +14,6 @@ body.light-theme { /* ライトテーマ */
   --panel-bg: rgba(255, 255, 255, 0.4); --panel-border-color: rgba(255, 255, 255, 0.3);
   --element-bg: rgba(255, 255, 255, 0.6); --element-border-color: rgba(0, 0, 0, 0.1);
   --element-hover-bg: rgba(255, 255, 255, 0.9); --element-text-color: #1c1e21;
-  --button-bg-gradient-start: #007bff; --button-bg-gradient-end: #0056b3;
-  --button-text-color: #fff; --button-shadow-color: #00418a;
   --top-bar-bg: rgba(255, 255, 255, 0.4); --top-bar-border-color: rgba(255, 255, 255, 0.3);
   --shadow-color: rgba(0, 0, 0, 0.1);
 }
@@ -28,13 +24,43 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; color: var(--text-color);
 /* --- トップページ --- */
 #top-large { text-align: center; margin-top: 100px; transition: opacity 0.3s, display 0.3s; }
 #top-large h1 { font-size: 64px; margin-bottom: 40px; color: var(--title-color); text-shadow: 0 3px 6px var(--shadow-color); }
-#top-large input { width: 400px; padding: 12px; font-size: 18px; border: 1px solid var(--element-border-color); border-radius: 8px; background: var(--element-bg); color: var(--text-color); box-shadow: inset 0 3px 6px var(--shadow-color); transition: all 0.2s ease; }
-#top-large input:focus { border-color: #aaa; outline: none; }
-#top-large button { padding: 12px 20px; font-size: 18px; border: 1px solid var(--button-shadow-color); border-radius: 8px; background: linear-gradient(to bottom, var(--button-bg-gradient-start), var(--button-bg-gradient-end)); color: var(--button-text-color); font-weight: bold; box-shadow: 0 6px 0 var(--button-shadow-color), 0 8px 12px var(--shadow-color); cursor: pointer; transition: all 0.2s ease; position: relative; margin-left: 8px; }
+
+/* ★★★ ここからが、ボタン類をガラスにするための修正です ★★★ */
+
+/* ガラス要素の共通スタイル (ボタン, 入力欄, スイッチ) */
+.glass-element {
+  background: var(--element-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--element-border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  color: var(--element-text-color);
+}
+.glass-element:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px var(--shadow-color);
+  background: var(--element-hover-bg);
+  border-color: var(--panel-border-color);
+}
+.glass-element:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px var(--shadow-color); /* クリック時に内側に影 */
+  transition-duration: 0.05s;
+}
+.glass-element::placeholder {
+  color: var(--placeholder-color);
+}
+
+
+/* トップページの入力欄とボタンのサイズ・フォントを指定 */
+#top-large input { width: 400px; padding: 12px; font-size: 18px; }
+#top-large button { padding: 12px 20px; font-size: 18px; font-weight: bold; cursor: pointer; margin-left: 8px; }
+
 
 /* --- 上部バー --- */
 #top-small { position: fixed; top: -80px; left: 0; width: 100%; display: flex; justify-content: center; align-items: center; padding: 12px 0; box-sizing: border-box; transition: top 0.3s ease; z-index: 1000;
-  /* ガラスの帯 */
   background: var(--top-bar-bg);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -42,20 +68,19 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; color: var(--text-color);
   box-shadow: 0 8px 32px 0 var(--shadow-color);
 }
 .top-small-content { display: flex; width: 90%; max-width: 800px; gap: 8px; align-items: center; }
-#top-small input { flex: 1; height: 36px; padding: 0 12px; font-size: 16px; border-radius: 8px; border: 1px solid var(--element-border-color); background: var(--element-bg); color: var(--text-color); transition: all 0.2s ease; }
-#top-small input:focus { border-color: #ccc; outline: none; }
-#top-small button { height: 36px; padding: 0 16px; font-size: 16px; font-weight: bold; border-radius: 8px; border: 1px solid var(--button-shadow-color); background: linear-gradient(to bottom, var(--button-bg-gradient-start), var(--button-bg-gradient-end)); color: var(--button-text-color); box-shadow: 0 4px 0 var(--button-shadow-color), 0 5px 8px var(--shadow-color); cursor: pointer; transition: all 0.2s ease; position: relative; }
 
-/* --- ボタンのホバー＆クリックエフェクト (v2のものを復活・統合) --- */
-#top-large button:hover, #top-small button:hover { transform: translateY(-1px); }
-#top-large button:active, #top-small button:active { transform: translateY(2px); box-shadow: inset 0 3px 6px rgba(0,0,0,0.4); }
+/* 上部バーの入力欄とボタンのサイズ・フォントを指定 */
+#top-small input { flex: 1; height: 36px; padding: 0 12px; font-size: 16px; }
+#top-small button { height: 36px; padding: 0 16px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
 
 /* --- テーマスイッチ --- */
-.theme-switch { position: relative; width: 50px; height: 26px; background-color: var(--element-bg); border: 1px solid var(--element-border-color); border-radius: 13px; cursor: pointer; z-index: 1001; flex-shrink: 0; }
+.theme-switch { position: relative; width: 50px; height: 26px; cursor: pointer; z-index: 1001; flex-shrink: 0; border-radius: 13px; }
 .theme-switch-slider { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: var(--text-color); border-radius: 50%; transition: transform 0.3s, background-color 0.3s; }
 body.light-theme .theme-switch-slider { transform: translateX(24px); }
 .theme-switch-top { position: fixed; top: 16px; right: 16px; transition: opacity 0.3s; }
 .theme-switch-top.hidden { opacity: 0; pointer-events: none; }
+
 
 /* --- コンテンツ表示エリア --- */
 #content { position: fixed; top: 0; left: 0; height: 100vh; width: 100%; box-sizing: border-box; visibility: hidden; opacity: 0; transition: opacity 0.3s ease; z-index: 900; }
