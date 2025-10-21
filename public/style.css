@@ -100,3 +100,24 @@ body.light-theme .theme-switch-slider { transform: translateX(24px); }
 #content > div { width: 100%; height: 100%; border: none; background: #fff; overflow: auto; }
 .version-label { position: fixed; bottom: 10px; right: 14px; font-size: 14px; color: rgba(255, 255, 255, 0.5); text-shadow: 0 1px 2px rgba(0,0,0,0.5); pointer-events: none; user-select: none; z-index: 1002; }
 body.light-theme .version-label { color: rgba(0, 0, 0, 0.4); text-shadow: none; }
+
+/* ========================================================== */
+/*  ダークテーマ時の上部URLバーの視認性向上（最優先スタイル）  */
+/* ========================================================== */
+
+/* 「light-themeクラスが付いていないbody」= ダークテーマ の時だけ適用 */
+body:not(.light-theme) #top-small input#url-input-small {
+    /* 背景色を、半透明ではない、完全な白に強制上書き */
+    background: #ffffff;
+    
+    /* 文字色を、完全な黒に強制上書き */
+    color: #000000;
+    
+    /* 枠線も分かりやすくする */
+    border-color: #999;
+}
+
+/* プレースホルダー（入力前の文字）も黒にする */
+body:not(.light-theme) #top-small input#url-input-small::placeholder {
+    color: #333;
+}
