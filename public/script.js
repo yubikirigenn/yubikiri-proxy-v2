@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- グローバル変数 ---
     let proxiedActive = false;
     let hideTimer = null;
+
+    // --- DOM要素の取得 ---
     const themeSwitchTop = document.getElementById('theme-switch-top');
     const themeSwitchBar = document.getElementById('theme-switch-bar');
     const topLarge = document.getElementById('top-large');
@@ -11,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputSmall = document.getElementById('url-input-small');
     const buttonSmall = document.getElementById('fetch-button-small');
 
+    // ==========================================================
+    //  機能1：テーマ切り替え機能
+    // ==========================================================
+    
     const applyTheme = (theme) => {
         if (theme === 'light') {
             document.body.classList.add('light-theme');
@@ -19,19 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         localStorage.setItem('theme', theme);
     };
+
     const handleThemeSwitch = () => {
         const isLight = document.body.classList.contains('light-theme');
         applyTheme(isLight ? 'dark' : 'light');
     };
+
     if (themeSwitchTop) themeSwitchTop.addEventListener('click', handleThemeSwitch);
     if (themeSwitchBar) themeSwitchBar.addEventListener('click', handleThemeSwitch);
+
+    // ==========================================================
+    //  機能2：プロキシとUI制御機能
+    // ==========================================================
 
     const setTopSmallVisible = (visible) => {
         if (!topSmall) return;
         if (visible) {
-            topLarge.style.top = '0';
+            topSmall.style.top = '0';
         } else {
-            topSmall.style.top = '-80px';
+            // CSSの #top-small の top の値と合わせる
+            topSmall.style.top = '-80px'; 
         }
     };
 
@@ -40,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('URLを入力してください。');
             return;
         }
+
         let targetUrl = url.trim();
         function isValidHttpUrl(string) {
             try {
@@ -47,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return urlObject.protocol === "http:" || urlObject.protocol === "https:";
             } catch (_) { return false; }
         }
+
         if (!isValidHttpUrl(targetUrl)) {
             if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
                 targetUrl = 'https://' + targetUrl;
@@ -59,35 +75,99 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!proxiedActive) {
                 proxiedActive = true;
                 if (themeSwitchTop) themeSwitchTop.classList.add('hidden');
-                if (topLarge) topLarge.style.display = 'none';
+                if (topLarge) topLarge.style.display = 'none'; // opacityではなくdisplay:noneで完全に消す
                 if (content) content.classList.add('visible');
             }
+            
             content.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-color); background-color: var(--bg-color); font-size: 1.2em; height: 100%; box-sizing: border-box;">読み込み中...</div>`;
+            
             const response = await fetch(`/proxy?url=${encodeURIComponent(targetUrl)}`);
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`サーバーエラー: ${response.status} ${errorText}`);
             }
+
             const html = await response.text();
             content.innerHTML = html;
             setTopSmallVisible(true);
+
         } catch (error) {
             console.error('プロキシエラー:', error);
             content.innerHTML = `<div style="padding: 24px; color: #ff6b6b; background-color: var(--bg-color); font-size: 1.2em; height: 100%; box-sizing: border-box;">ページの取得に失敗しました。<br><br>${error.message}</div>`;
             if (themeSwitchTop) themeSwitchTop.classList.remove('hidden');
             proxiedActive = false;
             setTopSmallVisible(false);
-            if (topLarge) topLarge.style.display = 'block';
+            if (topLarge) topLarge.style.display = 'block'; // エラー時は再表示
             if (content) content.classList.remove('visible');
         }
     };
 
-    const initTopBarAutoHide = () => { /* ... (変更なし) ... */ };
-    const initLinkHijacking = () => { /* ... (変更なし) ... */ };
-    if (buttonLarge && inputLarge) { /* ... (変更なし) ... */ }
-    if (buttonSmall && inputSmall) { /* ... (変更なし) ... */ }
-    if(inputLarge && inputSmall){ /* ... (変更なし) ... */ }
+    const initTopBarAutoHide = () => {
+        document.addEventListener('mousemove', (e) => {
+            if (!proxiedActive) return;
+            if (e.clientY <= 80) {
+                clearTimeout(hideTimer);
+                setTopSmallVisible(true);
+            } else {
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(() => setTopSmallVisible(false), 300);
+            }
+        });
+        document.addEventListener('mouseleave', () => {
+            if (!proxiedActive) return;
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => setTopSmallVisible(false), 300);
+        });
+    };
 
+    const initLinkHijacking = () => {
+        content.addEventListener('click', (event) => {
+            let targetElement = event.target;
+            for (let i = 0; i < 5; i++) {
+                if (targetElement && targetElement.tagName === 'A') break;
+                if (!targetElement || targetElement === content) { targetElement = null; break; }
+                targetElement = targetElement.parentElement;
+            }
+
+            if (targetElement) {
+                event.preventDefault();
+                const proxiedUrl = targetElement.getAttribute('href');
+                if (proxiedUrl && proxiedUrl.startsWith('/proxy?url=')) {
+                    try {
+                        const decodedUrl = decodeURIComponent(proxiedUrl.substring('/proxy?url='.length));
+                        if (inputSmall) inputSmall.value = decodedUrl;
+                        if (inputLarge) inputLarge.value = decodedUrl;
+                        loadInProxy(decodedUrl);
+                    } catch (e) { console.error('URLのデコードに失敗:', e); }
+                } else {
+                    if (proxiedUrl && (proxiedUrl.startsWith('http') || proxiedUrl.startsWith('mailto:'))) {
+                        window.open(proxiedUrl, '_blank');
+                    }
+                }
+            }
+        });
+    };
+
+    // --- イベントリスナーの設定 ---
+    if (buttonLarge && inputLarge) {
+        buttonLarge.addEventListener('click', () => loadInProxy(inputLarge.value));
+        inputLarge.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loadInProxy(inputLarge.value);
+        });
+    }
+    if (buttonSmall && inputSmall) {
+        buttonSmall.addEventListener('click', () => loadInProxy(inputSmall.value));
+        inputSmall.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loadInProxy(inputSmall.value);
+        });
+    }
+    if(inputLarge && inputSmall){
+        inputLarge.addEventListener('input', () => { inputSmall.value = inputLarge.value; });
+        inputSmall.addEventListener('input', () => { inputLarge.value = inputLarge.value; });
+    }
+
+    // --- 初期化処理 ---
     const savedTheme = localStorage.getItem('theme') || 'dark';
     applyTheme(savedTheme);
     initTopBarAutoHide();
