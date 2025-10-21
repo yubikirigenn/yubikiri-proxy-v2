@@ -4,27 +4,25 @@
   --bg-gradient: linear-gradient(135deg, #23074d 0%, #cc5333 100%);
   --text-color: #eee;
   --title-color: #fff;
-  --panel-bg: rgba(30, 30, 30, 0.6); /* ガラスの色 */
+  --panel-bg: rgba(30, 30, 30, 0.6);
   --panel-border-color: rgba(255, 255, 255, 0.15);
-  --input-bg: rgba(0, 0, 0, 0.3);
-  --input-border-color: rgba(255, 255, 255, 0.3);
-  --button-bg: rgba(255, 255, 255, 0.9);
-  --button-text-color: #222;
+  --glass-element-bg: rgba(0, 0, 0, 0.3); /* ボタンや入力欄のガラス色 */
+  --glass-element-border-color: rgba(255, 255, 255, 0.3);
+  --glass-button-text-color: #eee;
   --shadow-color: rgba(0, 0, 0, 0.3);
-  --iframe-bg: #fff; /* iframeの中は基本白 */
+  --iframe-bg: #fff;
 }
 
 body.light-theme {
   /* [ライトテーマ] */
   --bg-gradient: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
   --text-color: #1c1e21;
-  --title-color: #0d47a1; /* 濃い青 */
-  --panel-bg: rgba(255, 255, 255, 0.5); /* ガラスの色 */
+  --title-color: #0d47a1;
+  --panel-bg: rgba(255, 255, 255, 0.5);
   --panel-border-color: rgba(255, 255, 255, 0.4);
-  --input-bg: rgba(255, 255, 255, 0.7);
-  --input-border-color: rgba(0, 0, 0, 0.2);
-  --button-bg: #007bff;
-  --button-text-color: #fff;
+  --glass-element-bg: rgba(255, 255, 255, 0.7);
+  --glass-element-border-color: rgba(0, 0, 0, 0.1);
+  --glass-button-text-color: #1c1e21;
   --shadow-color: rgba(0, 0, 0, 0.1);
   --iframe-bg: #fff;
 }
@@ -50,6 +48,26 @@ body {
     box-shadow: 0 8px 32px 0 var(--shadow-color);
 }
 
+/* ★★★ ガラス風要素（ボタン、入力欄）の共通スタイルを追加 ★★★ */
+.glass-element {
+    background: var(--glass-element-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-element-border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+.glass-element:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px var(--shadow-color);
+}
+.glass-element:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+
 /* --- トップページ（大きなフォーム）のスタイル --- */
 #top-large {
   width: 600px;
@@ -71,11 +89,7 @@ body {
   max-width: 400px;
   padding: 12px;
   font-size: 18px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  background: var(--input-bg);
   color: var(--text-color);
-  border: 1px solid var(--input-border-color);
 }
 #top-large input:focus {
   border-color: #aaa;
@@ -84,34 +98,38 @@ body {
 #top-large button {
   padding: 12px 20px;
   font-size: 18px;
-  border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
   margin-left: 8px;
-  border: none;
-  background: var(--button-bg);
-  color: var(--button-text-color);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  color: var(--glass-button-text-color);
 }
 
 /* --- サイト表示中の上部バーのスタイル --- */
+/* ★★★ #top-small のスタイルを修正 ★★★ */
 #top-small {
   position: fixed;
-  top: -70px; /* 少し高さを上げる */
-  left: 0; right: 0;
-  width: 90%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 8px;
+  top: -70px;
+  left: 0;
+  right: 0;
+  width: 100%; /* 幅を100%に戻す */
+  padding: 8px 0; /* 左右のpaddingをなくす */
   box-sizing: border-box;
   transition: top 0.3s ease;
   z-index: 1000;
+  /* ここで背景とぼかしを設定 */
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--panel-border-color); /* 下線としての境界線 */
+  box-shadow: 0 8px 32px 0 var(--shadow-color);
+  /* border-radius は不要 */
 }
 .top-small-content {
   display: flex;
-  width: 100%;
+  width: 90%; /* 中身の幅を制限 */
+  max-width: 800px;
+  margin: 0 auto; /* 中央寄せ */
   gap: 8px;
   align-items: center;
 }
@@ -120,11 +138,7 @@ body {
   height: 36px;
   padding: 0 12px;
   font-size: 16px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  background: var(--input-bg);
   color: var(--text-color);
-  border: 1px solid var(--input-border-color);
 }
 #top-small input:focus {
   border-color: #ccc;
@@ -135,37 +149,22 @@ body {
   padding: 0 16px;
   font-size: 16px;
   font-weight: bold;
-  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
-  border: none;
-  background: var(--button-bg);
-  color: var(--button-text-color);
-  box-shadow: 0 2px 8px var(--shadow-color);
+  color: var(--glass-button-text-color);
 }
 
-/* --- ボタンのホバー＆クリックエフェクト --- */
-#top-large button:hover, #top-small button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px var(--shadow-color);
-}
-#top-large button:active, #top-small button:active {
-    transform: translateY(1px);
-    box-shadow: none;
-}
 
 /* --- テーマ切り替えスイッチ --- */
 .theme-switch {
   position: relative;
   width: 50px;
   height: 26px;
-  background-color: var(--input-bg);
-  border: 1px solid var(--input-border-color);
-  border-radius: 13px;
   cursor: pointer;
   z-index: 1001;
   flex-shrink: 0;
+  /* .glass-elementのスタイルを継承しつつ微調整 */
+  border-radius: 13px;
 }
 .theme-switch-slider {
   position: absolute;
@@ -173,7 +172,7 @@ body {
   left: 2px;
   width: 20px;
   height: 20px;
-  background-color: var(--button-bg);
+  background-color: var(--glass-button-text-color); /* スライダーの色を変更 */
   border-radius: 50%;
   transition: transform 0.3s, background-color 0.3s;
 }
@@ -192,20 +191,21 @@ body.light-theme .theme-switch-slider {
 }
 
 /* --- コンテンツ表示エリアとバージョンラベル --- */
+#content, #content > div { /* 共通化 */
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
 #content {
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.3s ease;
-  height: 100vh;
-  box-sizing: border-box;
 }
 #content.visible {
   visibility: visible;
   opacity: 1;
 }
 #content > div {
-  width: 100%;
-  height: 100%;
   border: none;
   background: var(--iframe-bg);
   overflow: auto;
@@ -215,7 +215,7 @@ body.light-theme .theme-switch-slider {
   bottom: 10px;
   right: 14px;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.5); /* 白基準の半透明に */
+  color: rgba(255, 255, 255, 0.5);
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   pointer-events: none;
   user-select: none;

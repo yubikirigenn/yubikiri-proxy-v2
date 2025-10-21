@@ -52,20 +52,29 @@
 
 <!-- public/index.html (変更部分のみ) -->
 
-    <!-- ★ class="glass-panel" を追加 ★ -->
     <div id="top-large" class="glass-panel">
         <h1>Yubikiri Proxy</h1>
-        <input type="text" id="url-input-large" placeholder="表示したいページのURLを入力">
-        <button id="fetch-button-large">Go</button>
+        <!-- ★ class="glass-element" を追加 ★ -->
+        <input type="text" id="url-input-large" class="glass-element" placeholder="表示したいページのURLを入力">
+        <!-- ★ class="glass-element" を追加 ★ -->
+        <button id="fetch-button-large" class="glass-element">Go</button>
     </div>
 
-    <!-- ★ class="glass-panel" を追加 ★ -->
-    <div id="top-small" class="glass-panel">
+    <div id="top-small"> <!-- ここはglass-panelではない！ -->
         <div class="top-small-content">
-            <input type="text" id="url-input-small" placeholder="URLを入力...">
-            <button id="fetch-button-small">Go</button>
-            <div class="theme-switch" id="theme-switch-bar" title="テーマを切り替え">
+            <!-- ★ class="glass-element" を追加 ★ -->
+            <input type="text" id="url-input-small" class="glass-element" placeholder="URLを入力...">
+            <!-- ★ class="glass-element" を追加 ★ -->
+            <button id="fetch-button-small" class="glass-element">Go</button>
+            <!-- ★ class="glass-element" を追加 ★ -->
+            <div class="theme-switch glass-element" id="theme-switch-bar" title="テーマを切り替え">
                 <div class="theme-switch-slider"></div>
             </div>
         </div>
+    </div>
+    
+    <!-- トップページ用スイッチにもクラスを追加 -->
+    <div class="theme-switch theme-switch-top glass-element" id="theme-switch-top" title="テーマを切り替え">
+        <div class="theme-switch-slider"></div>
+    </div>
     </div>
