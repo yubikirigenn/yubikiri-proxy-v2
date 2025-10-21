@@ -44,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (visible) {
             topSmall.style.top = '0';
         } else {
-            // CSSの #top-small の top の値と合わせる
-            topSmall.style.top = '-80px'; 
+            topSmall.style.top = '-80px'; // CSSの値と一致させる
         }
     };
 
@@ -75,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!proxiedActive) {
                 proxiedActive = true;
                 if (themeSwitchTop) themeSwitchTop.classList.add('hidden');
-                if (topLarge) topLarge.style.display = 'none'; // opacityではなくdisplay:noneで完全に消す
+                if (topLarge) topLarge.style.display = 'none';
                 if (content) content.classList.add('visible');
             }
             
@@ -98,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (themeSwitchTop) themeSwitchTop.classList.remove('hidden');
             proxiedActive = false;
             setTopSmallVisible(false);
-            if (topLarge) topLarge.style.display = 'block'; // エラー時は再表示
+            if (topLarge) topLarge.style.display = 'block';
             if (content) content.classList.remove('visible');
         }
     };

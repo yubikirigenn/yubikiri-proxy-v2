@@ -3,78 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- titleタグも2.0.0に合わせておきましょう -->
-    <title>Yubikiri Proxy v2.0.0</title>
+    <title>Yubikiri Proxy v3.0</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-    <!-- トップページ用のテーマ切り替えスイッチ -->
+    <!-- トップページ用テーマスイッチ -->
     <div class="theme-switch theme-switch-top" id="theme-switch-top" title="テーマを切り替え">
         <div class="theme-switch-slider"></div>
     </div>
 
-    <!-- 初期表示の大きな入力フォーム -->
+    <!-- トップページのメインパネル -->
     <div id="top-large">
         <h1>Yubikiri Proxy</h1>
         <input type="text" id="url-input-large" placeholder="表示したいページのURLを入力">
         <button id="fetch-button-large">Go</button>
     </div>
 
-    <!-- 検索後に表示される小さな上部バー -->
+    <!-- サイト表示中の上部バー -->
     <div id="top-small">
         <div class="top-small-content">
             <input type="text" id="url-input-small" placeholder="URLを入力...">
             <button id="fetch-button-small">Go</button>
-            
-            <!-- サイト表示中、上部バーに追従するテーマ切り替えスイッチ -->
             <div class="theme-switch" id="theme-switch-bar" title="テーマを切り替え">
                 <div class="theme-switch-slider"></div>
             </div>
         </div>
     </div>
 
-    <!-- プロキシ結果を表示するコンテナ -->
+    <!-- コンテンツ表示エリア -->
     <div id="content"></div>
 
-    <!-- =================================== -->
-    <!--          バージョン表示 (修正箇所)   -->
-    <!-- =================================== -->
-    <div class="version-label">
-        v2.0.0
-    </div>
+    <!-- バージョン表示 -->
+    <div class="version-label">v3.0.0</div>
 
-    <!-- JavaScriptファイルを読み込む -->
     <script src="/script.js"></script>
-
 </body>
 </html>
-
-<!-- public/index.html (変更部分のみ) -->
-
-    <div id="top-large" class="glass-panel">
-        <h1>Yubikiri Proxy</h1>
-        <!-- ★ class="glass-element" を追加 ★ -->
-        <input type="text" id="url-input-large" class="glass-element" placeholder="表示したいページのURLを入力">
-        <!-- ★ class="glass-element" を追加 ★ -->
-        <button id="fetch-button-large" class="glass-element">Go</button>
-    </div>
-
-    <div id="top-small"> <!-- ここはglass-panelではない！ -->
-        <div class="top-small-content">
-            <!-- ★ class="glass-element" を追加 ★ -->
-            <input type="text" id="url-input-small" class="glass-element" placeholder="URLを入力...">
-            <!-- ★ class="glass-element" を追加 ★ -->
-            <button id="fetch-button-small" class="glass-element">Go</button>
-            <!-- ★ class="glass-element" を追加 ★ -->
-            <div class="theme-switch glass-element" id="theme-switch-bar" title="テーマを切り替え">
-                <div class="theme-switch-slider"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- トップページ用スイッチにもクラスを追加 -->
-    <div class="theme-switch theme-switch-top glass-element" id="theme-switch-top" title="テーマを切り替え">
-        <div class="theme-switch-slider"></div>
-    </div>
-    </div>
